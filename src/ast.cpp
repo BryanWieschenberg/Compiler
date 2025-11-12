@@ -9,7 +9,9 @@ RetStmt::RetStmt(IntLiteral* e) : expr(e) {
     type = ASTNodeType::RetStmt;
 }
 
-RetStmt::~RetStmt() { delete expr; }
+RetStmt::~RetStmt() {
+    delete expr;
+}
 
 BinaryExpr::BinaryExpr(BinOp o, ASTNode* l, ASTNode* r)
     : op(o), left(l), right(r)

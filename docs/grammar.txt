@@ -1,0 +1,367 @@
+====================
+GRAMMAR:
+====================
+
+ALL_UPPERCASE    terminal symbols (TOKENS)
+PascalCase    nonterminal symbols (SyntaxNodes)
+snake_case    grammar rules
+?    optional
+*    >= 0
++    > 0
+|    or
+
+start_symbol = translation_unit
+
+translation_unit:
+    import_directive*
+    declaration*
+    END
+
+import_directive:
+    IMPORT STRING_LIT (AS IDENT)? SEMI
+
+declaration:
+    | DeclMerge
+    | DeclNamespace
+    | DeclVar
+    | DeclFunc
+    | DeclClass
+    | DeclEnum
+
+DeclVar:
+    type IDENT (ASGN expression)? SEMI
+
+DeclFunc:
+    type IDENT CURLYL param_list? CURLYR stmt_block
+
+DeclClass:
+    CLASS IDENT CURLYL class_member* CURLYR
+
+DeclEnum:
+    ENUM IDENT CURLYL enum_member_list CURLYR
+
+DeclNamespace:
+    NAMESPACE IDENT CURLYL declaration_list CURLYR
+
+DeclMerge:
+    MERGE TODO:
+
+param_list:
+    param (COMMA param)*
+
+param:
+    type IDENT
+
+statement:
+    | stmt_block
+    | stmt_ret
+    | stmt_if
+    | stmt_while
+    | stmt_dowhile TODO:
+    | stmt_for
+    | stmt_switch
+    | stmt_break
+    | stmt_cont
+    | stmt_decl
+    | stmt_expr
+
+stmt_block:
+    CURLYL statement* CURLYR
+
+stmt_ret:
+    RETURN expression? SEMI
+
+stmt_if:
+    IF CURLYL expression CURLYR statement (ELIF statement)? (ELSE statement)? TODO:
+
+stmt_while:
+    WHILE CURLYL expression CURLYR statement
+
+stmt_for:
+    FOR IDENT COLON stmt_expr statement
+
+stmt_switch:
+    SWITCH CURLYL expression CURLYR CURLYL stmt_case* CURLYR
+
+stmt_case:
+    (CASE expression | DEFAULT) COLON statement*
+
+stmt_break:
+    BREAK SEMI
+
+stmt_continue:
+    CONT SEMI
+
+stmt_decl:
+    decl_var
+
+stmt_expr:
+    expression SEMI
+
+expression:
+    assignment
+
+assignment:
+    logical_or (asgn_op logical_or)*
+
+asgn_op:
+    | ASGN
+    | ASGN_PLUS
+    | ASGN_MINUS
+    | ASGN_STAR
+    | ASGN_SLASH
+    | ASGN_PERCENT
+    | ASGN_AND
+    | ASGN_OR
+    | ASGN_XOR
+    | ASGN_SHIFTL
+    | ASGN_SHIFTR
+
+logical_or:
+    logical_and (LOG_OR logical_and)*
+
+logical_and:
+    equality (LOG_AND equality)*
+
+equality:
+    comparison ((EQ | NEQ) comparison)*
+
+comparison:
+    term ((LESS | LESS_EQ | GREAT | GREAT_EQ) term)*
+
+term:
+    factor ((PLUS | MINUS) factor)*
+
+factor:
+    unary ((STAR | SLASH | PERC) unary)*
+
+unary:
+    | (MINUS | LOG_NOT | BIT_NOT | INC | DEC) unary
+    | postfix
+
+postfix:
+    | primary
+    | postfix INC
+    | postfix DEC
+    | postfix PARENL arg_list? PARENR
+    | postfix DOT IDENT
+    | postfix CURLYL expression CURLYR
+
+primary:
+    | IDENT
+    | literal
+    | PARENL expression PARENR
+    | SELF DOT IDENT
+
+arg_list:
+    expression (COMMA expression)*
+
+literal:
+    | LIT_INT
+    | LIT_FLOAT
+    | LIT_CHAR
+    | LIT_STR
+    | TRUE
+    | FALSE
+    | NULL
+
+type:
+    | TypePrim
+    | TypeClass
+    | TypeAuto
+    | TypeGlob
+    | TypeVoid
+    | type PTR
+    | type AMP
+    | type SQUARL LIT_INT? SQUARR    array type TODO:
+    | type PARENL type_list? PARENR    function type
+
+type_list:
+    type (COMMA type)*
+
+====================
+TOKENS:
+====================
+
+KEYWORDS:
+
+RETURN
+IF
+ELIF
+ELSE
+WHILE
+DO
+FOR
+SWITCH
+CASE
+DEF
+BREAK
+CONT
+CLASS
+PUBL
+PRIV
+PROT
+ENUM
+NAMESPACE
+IMPORT
+FROM
+AS
+MERGE
+TRUE
+FALSE
+NULL
+AUTO
+GLOBAL
+VOID
+CONST
+
+IDENTIFIERS & LITERALS:
+
+IDENT    var, func, class names
+LIT_INT    123, 0xFF, 0755, 123L, 255B (semantic analyzer looks at suffix 'L' or 'B' to infer long/byte and set node type)
+LIT_FLOAT    3.14, .5
+LIT_CHAR    'a', '\n'
+LIT_STR    "hello"
+LIT_BOOL    true false
+
+OPERATORS:
+
+PLUS
+MINUS
+STAR
+SLASH
+PERC
+ASGN
+ASGN_PLUS
+ASGN_MINUS
+ASGN_STAR
+ASGN_SLASH
+ASGN_PERC
+ASGN_AND
+ASGN_OR
+ASGN_XOR
+ASGN_SHIFTL
+ASGN_SHIFTR
+EQ
+NEQ
+LESS
+LESS_EQ
+GREAT
+GREAT_EQ
+LOG_AND
+LOG_OR
+LOG_XOR
+LOG_NOT
+BIT_AND
+BIT_OR
+BIT_XOR
+BIT_NOR
+BIT_SHIFTL
+BIT_SHIFTR
+INC
+DEC
+QUES
+COLON
+DOT
+CURLYL
+CURLYR
+PARENL
+PARENR
+SQUARL
+SQUARR
+COMMA
+SEMI
+PTR
+REF
+COLON_DUB
+ATTRL
+ATTRR
+END
+INVALID
+
+====================
+SYNTAX NODES:
+====================
+
+PROGRAM STRUCTURE:
+
+TranslationUnit
+ImportDirective
+
+----------
+
+DECLARATIONS:
+
+DeclMerge
+DeclNamespace
+DeclVar
+DeclFunc
+DeclClass
+DeclEnum
+DeclField
+DeclParam
+
+----------
+
+STATEMENTS:
+
+StmtBlock { }
+StmtRet
+StmtIf
+StmtElif
+StmtElse
+StmtWhile
+StmtDoWhile
+StmtFor
+StmtSwitch
+StmtCase
+StmtDef
+StmtBreak
+StmtCont
+StmtDecl    int x = 5;
+StmtExpr    foo();
+
+----------
+
+EXPRESSIONS:
+
+ExprBin    + - * / % & | ^ ! && || ^^ !! << >>
+ExprUnaryPre    !x -x ++x
+ExprUnaryPost    x! x- x++
+ExprAsgn    a = b
+ExprAsgnCmpd    a += b, b *= a a %= b
+ExprCond    a ? b : c
+ExprCall    foo(1, 2)
+ExprCast    int(x)
+ExprMember    obj.field
+ExprIdx    arr[i]
+ExprLit    int float char str bools
+ExprIdent    var reference
+ExprParen    parenthesized expression for order of ops
+ExprSelf    self.
+
+----------
+
+TYPES:
+
+TypePrim    int float etc.
+TypePtr    int*
+TypeRef    int&
+TypeArr    int[5]
+TypeFunc    int(int, int)
+TypeClass
+TypeAuto
+TypeGlob
+TypeVoid
+TypeConst
+
+----------
+
+OTHER / META CONSTRUCTS:
+Attr    [[nodiscard]] __attribute__
+
+----------
+
+IGNORED:    ignored during lexication
+whitespace
+comments
